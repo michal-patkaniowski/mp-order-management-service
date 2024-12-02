@@ -44,9 +44,13 @@ final class Product
     #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'products')]
     private Collection $orders;
 
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
+    private Collection $orderProducts;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
     }
 
     public function getId(): int
@@ -117,5 +121,10 @@ final class Product
     public function getOrders(): Collection
     {
         return $this->orders;
+    }
+
+    public function getOrderProducts(): Collection
+    {
+        return $this->orderProducts;
     }
 }
