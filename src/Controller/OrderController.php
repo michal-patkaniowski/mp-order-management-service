@@ -33,8 +33,8 @@ final class OrderController extends AbstractController
     }
 
     #[OA\Get(
-        path: "/orders/all",
-        summary: "Get all user orders",
+        path: "/orders",
+        summary: "Get all user's orders",
         responses: [
             new OA\Response(
                 response: 200,
@@ -49,7 +49,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/all',
+            path: '',
             requirements: [],
             methods: ['GET'],
         )
@@ -89,7 +89,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/{orderId}',
+            path: '/{orderId}',
             requirements: ['orderId' => '\d+'],
             methods: ['GET'],
         )
@@ -103,7 +103,7 @@ final class OrderController extends AbstractController
     }
 
     #[OA\Get(
-        path: "/orders/",
+        path: "/orders/active",
         summary: "Get active user order",
         responses: [
             new OA\Response(
@@ -119,7 +119,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/',
+            path: '/active',
             requirements: [],
             methods: ['GET'],
         )
@@ -132,7 +132,7 @@ final class OrderController extends AbstractController
     }
 
     #[OA\Post(
-        path: "/orders/",
+        path: "/orders",
         summary: "Create new active user order",
         responses: [
             new OA\Response(
@@ -148,7 +148,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/',
+            path: '',
             requirements: [],
             methods: ['POST'],
         )
@@ -195,7 +195,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/{statusAction}/{orderId}',
+            path: '/{statusAction}/{orderId}',
             requirements: [
             'orderId' => '\d+',
             'statusAction' => 'cancel|restore'
@@ -253,7 +253,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/{orderId}/products/{productId}',
+            path: '/{orderId}/products/{productId}',
             requirements: [
             'orderId' => '\d+',
             'productId' => '\d+'
@@ -313,7 +313,7 @@ final class OrderController extends AbstractController
     )]
     #[
         Route(
-            name: '/{orderId}/products/{productId}',
+            path: '/{orderId}/products/{productId}',
             requirements: [
             'orderId' => '\d+',
             'productId' => '\d+'

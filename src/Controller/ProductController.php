@@ -43,7 +43,7 @@ final class ProductController extends AbstractController
     )]
     #[
         Route(
-            name: '/all',
+            path: '',
             requirements: [],
             methods: ['GET'],
         )
@@ -83,7 +83,7 @@ final class ProductController extends AbstractController
     )]
     #[
         Route(
-            name: '/{productId}',
+            path: '/{productId}',
             requirements: ['productId' => '\d+'],
             methods: ['GET'],
         )

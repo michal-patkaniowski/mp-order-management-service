@@ -31,7 +31,9 @@ final class OrderRepository extends ServiceEntityRepository implements OrderRepo
 
     public function saveOrder(Order $order): Order
     {
-        $order->setCreatedAt(new DateTime());
+        $now = new DateTime();
+        $now->setTime((int)$now->format('H'), (int)$now->format('i'), 0);
+        $order->setCreatedAt($now);
         $this->getEntityManager()->persist($order);
         $this->getEntityManager()->flush();
         return $order;
