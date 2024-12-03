@@ -8,7 +8,22 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: "Product",
+    type: "object",
+    properties: [
+        new OA\Property(property: "id", type: "integer"),
+        new OA\Property(property: "title", type: "string"),
+        new OA\Property(property: "description", type: "string"),
+        new OA\Property(property: "price", type: "number"),
+        new OA\Property(property: "category", type: "string"),
+        new OA\Property(property: "image", type: "string"),
+        new OA\Property(property: "rating", ref: "#/components/schemas/Rating"),
+        new OA\Property(property: "available", type: "boolean")
+    ]
+)]
 #[ORM\Entity]
 #[ORM\Table(name: '"product"')]
 final class Product
