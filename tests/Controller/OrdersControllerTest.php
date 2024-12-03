@@ -8,42 +8,61 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class OrdersControllerTest extends WebTestCase
 {
-    public function testOrderCreation()
+    public function testCreateOrder()
     {
         $client = static::createClient();
-
-        // Request 1: Create a new active user order
         $postData = ['product_id' => 1, 'quantity' => 2];
         $client->request('POST', '/orders', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($postData));
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to create order');
         $order1 = json_decode($client->getResponse()->getContent(), true);
+        return $order1;
+    }
 
-        // Request 2: Collect the order with id from the response from request 1
+    /**
+     * @depends testCreateOrder
+     */
+    public function testGetOrderById($order1)
+    {
+        $client = static::createClient();
         $client->request('GET', '/orders/' . $order1['id']);
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to get order by id');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve order by ID');
         $order2 = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals($order1, $order2, 'The order retrieved by ID does not match the created order');
+        return $order2;
+    }
 
-        // Request 3: Collect the user's active order
+    /**
+     * @depends testGetOrderById
+     */
+    public function testGetActiveOrder($order2)
+    {
+        $client = static::createClient();
         $client->request('GET', '/orders/active');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to get active order');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve active order');
         $order3 = json_decode($client->getResponse()->getContent(), true);
-
-        // Request 4: Collect all user's orders
-        $client->request('GET', '/orders');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to get all orders');
-        $orders = json_decode($client->getResponse()->getContent(), true);
-
-        // Assert whether orders from requests 1 and 2 are the same
-        $this->assertEquals($order1, $order2, 'Order from request 1 and request 2 do not match');
-
-        // Assert whether orders from requests 2 and 3 are the same
-        $this->assertEquals($order2, $order3, 'Order from request 2 and request 3 do not match');
-
-        // Assert whether the first active user's order from request 4 and order from request 3 are the same
         $this->assertEquals(
-            $orders[0],
+            $order2,
             $order3,
-            'First active order from request 4 and order from request 3 do not match'
+            'The retrieved user\'s active order does not match the order retrieved by ID'
+        );
+        return $order3;
+    }
+
+    /**
+     * @depends testGetActiveOrder
+     */
+    public function testGetAllOrders($order3)
+    {
+        $client = static::createClient();
+        $client->request('GET', '/orders');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve all orders');
+        $orders = json_decode($client->getResponse()->getContent(), true);
+        $activeOrders = array_filter($orders, fn($order) => $order['active']);
+        $order4 = array_values($activeOrders)[0];
+        $this->assertEquals(
+            $order3,
+            $order4,
+            'The first active order from the orders list does not match the retrieved user\'s active order'
         );
     }
 }
