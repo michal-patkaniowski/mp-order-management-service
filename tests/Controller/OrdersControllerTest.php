@@ -64,5 +64,51 @@ class OrdersControllerTest extends WebTestCase
             $order4,
             'The first active order from the orders list does not match the retrieved user\'s active order'
         );
+        return $order4;
+    }
+
+    /**
+     * @depends testGetActiveOrder
+     */
+    public function testCancelOrder($order3)
+    {
+        $client = static::createClient();
+        $newStatus = 'cancel';
+        $client->request('PUT', '/orders/' . $newStatus . '/' . $order3['id']);
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to cancel order');
+
+        $client->request('GET', '/orders/' . $order3['id']);
+        $this->assertEquals(
+            200,
+            $client->getResponse()->getStatusCode(),
+            'Failed to retrieve order by ID after status change'
+        );
+        $updatedOrder = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(false, $updatedOrder['active'], 'Order has not been canceled correctly');
+    }
+
+    /**
+     * @depends testGetAllOrders
+     */
+    public function testRestoreOrder($order4)
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/orders');
+        $orders = json_decode($client->getResponse()->getContent(), true);
+        $inactiveOrder = array_filter($orders, fn($order) => !$order['active'])[0];
+
+        $newStatus = 'restore';
+        $client->request('PUT', '/orders/' . $newStatus . '/' . $inactiveOrder['id']);
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to restore order');
+
+        $client->request('GET', '/orders/' . $inactiveOrder['id']);
+        $this->assertEquals(
+            200,
+            $client->getResponse()->getStatusCode(),
+            'Failed to retrieve order by ID after restoring'
+        );
+        $restoredOrder = json_decode($client->getResponse()->getContent(), true);
+        $this->assertEquals(true, $restoredOrder['active'], 'Order has not been restored correctly');
     }
 }

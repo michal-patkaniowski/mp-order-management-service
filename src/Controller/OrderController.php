@@ -200,7 +200,7 @@ final class OrderController extends AbstractController
             'orderId' => '\d+',
             'statusAction' => 'cancel|restore'
             ],
-            methods: ['POST'],
+            methods: ['PUT'],
         )
     ]
     public function changeOrderStatusAction(
