@@ -13,7 +13,7 @@ interface OrderRepositoryInterface
      */
     public function getUserOrders(string $userId): array;
 
-    public function getOrderById(int $id): Order;
+    public function getOrderById(int $id): ?Order;
 
     public function saveOrder(Order $order): Order;
 

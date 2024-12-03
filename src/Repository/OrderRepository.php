@@ -24,7 +24,7 @@ final class OrderRepository extends ServiceEntityRepository implements OrderRepo
         return $this->findBy(['userId' => $userId]);
     }
 
-    public function getOrderById(int $id): Order
+    public function getOrderById(int $id): ?Order
     {
         return $this->find($id);
     }

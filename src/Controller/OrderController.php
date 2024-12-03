@@ -164,9 +164,9 @@ final class OrderController extends AbstractController
         }
     }
 
-    private function ensureOrderAccess(Order $order): void
+    private function ensureOrderAccess(?Order $order): void
     {
-        if ($order->getUserId() !== 'test-user-id') {
+        if ($order === null || $order->getUserId() !== 'test-user-id') {
             throw new Exception('Access forbidden', 403);
         }
     }
