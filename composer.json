@@ -20,7 +20,8 @@
         "symfony/routing": "5.4.*",
         "symfony/runtime": "5.4.*",
         "symfony/validator": "5.4.*",
-        "symfony/yaml": "5.4.*"
+        "symfony/yaml": "5.4.*",
+        "zircote/swagger-php": "^4.11"
     },
     "config": {
         "allow-plugins": {

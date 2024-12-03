@@ -4,13 +4,27 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Entity\OrderProduct;
 use DateTimeInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use App\Entity\OrderProduct;
+use Doctrine\ORM\Mapping as ORM;
+use OpenApi\Attributes as OA;
+use Symfony\Component\Validator\Constraints as Assert;
 
+#[OA\Schema(
+    schema: "Order",
+    type: "object",
+    properties: [
+        new OA\Property(property: "id", type: "integer"),
+        new OA\Property(property: "userId", type: "string"),
+        new OA\Property(property: "productIds", type: "array", items: new OA\Items(type: "integer")),
+        new OA\Property(property: "status", type: "string"),
+        new OA\Property(property: "createdAt", type: "string", format: "date-time"),
+        new OA\Property(property: "updatedAt", type: "string", format: "date-time")
+    ]
+)
+]
 #[ORM\Entity]
 #[ORM\Table(name: '"order"')]
 final class Order

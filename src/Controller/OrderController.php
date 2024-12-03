@@ -12,8 +12,16 @@ use App\Service\ApiDataGuardInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
-#[Route('/orders')]
+#[
+    Route('/orders'),
+    OA\Info(
+        title: "Order API",
+        version: "1.0.0",
+        description: "API for managing orders"
+    )
+]
 final class OrderController extends AbstractController
 {
     public function __construct(
@@ -24,6 +32,21 @@ final class OrderController extends AbstractController
     ) {
     }
 
+    #[OA\Get(
+        path: "/orders/all",
+        summary: "Get all user orders",
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(ref: "#/components/schemas/Order"))
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/all',
@@ -37,6 +60,33 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($orders);
     }
 
+    #[OA\Get(
+        path: "/orders/{orderId}",
+        summary: "Get order by ID",
+        parameters: [
+            new OA\Parameter(
+                name: "orderId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Order not found"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/{orderId}',
@@ -52,6 +102,21 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($order);
     }
 
+    #[OA\Get(
+        path: "/orders/",
+        summary: "Get active user order",
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/',
@@ -66,6 +131,21 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($order);
     }
 
+    #[OA\Post(
+        path: "/orders/",
+        summary: "Create new active user order",
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Order created",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/',
@@ -80,6 +160,39 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($newOrder);
     }
 
+    #[OA\Post(
+        path: "/orders/{statusAction}/{orderId}",
+        summary: "Change order status",
+        parameters: [
+            new OA\Parameter(
+                name: "orderId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            ),
+            new OA\Parameter(
+                name: "statusAction",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "string", enum: ["cancel", "restore"])
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Order not found"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/{statusAction}/{orderId}',
@@ -102,6 +215,39 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($order);
     }
 
+    #[OA\Post(
+        path: "/orders/{orderId}/products/{productId}",
+        summary: "Add product to order",
+        parameters: [
+            new OA\Parameter(
+                name: "orderId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            ),
+            new OA\Parameter(
+                name: "productId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Order or product not found"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/{orderId}/products/{productId}',
@@ -129,6 +275,39 @@ final class OrderController extends AbstractController
         return new MyJsonResponse($order);
     }
 
+    #[OA\Delete(
+        path: "/orders/{orderId}/products/{productId}",
+        summary: "Remove product from order",
+        parameters: [
+            new OA\Parameter(
+                name: "orderId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            ),
+            new OA\Parameter(
+                name: "productId",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Successful response",
+                content: new OA\JsonContent(ref: "#/components/schemas/Order")
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Order or product not found"
+            )
+        ]
+    )]
     #[
         Route(
             name: '/{orderId}/products/{productId}',
