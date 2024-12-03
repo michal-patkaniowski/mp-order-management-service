@@ -19,7 +19,7 @@ final class OrderRepository extends ServiceEntityRepository implements OrderRepo
     /**
      * @return Order[]
      */
-    public function getOrders(string $userId): array
+    public function getUserOrders(string $userId): array
     {
         return $this->findBy(['userId' => $userId]);
     }
@@ -35,5 +35,13 @@ final class OrderRepository extends ServiceEntityRepository implements OrderRepo
         $this->getEntityManager()->persist($order);
         $this->getEntityManager()->flush();
         return $order;
+    }
+
+    /**
+     * @return Order[]
+     */
+    public function findActiveUserOrders(string $userId): array
+    {
+        return $this->findBy(['userId' => $userId, 'active' => true]);
     }
 }

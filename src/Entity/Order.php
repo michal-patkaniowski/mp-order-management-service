@@ -27,10 +27,6 @@ final class Order
     #[ORM\Column(type: 'datetime')]
     private DateTimeInterface $createdAt;
 
-    #[ORM\ManyToMany(targetEntity: Product::class)]
-    #[ORM\JoinTable(name: 'order_products')]
-    private Collection $products;
-
     #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'order', cascade: ['persist', 'remove'])]
     private Collection $orderProducts;
 
@@ -39,7 +35,6 @@ final class Order
 
     public function __construct()
     {
-        $this->products = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
     }
 
@@ -68,40 +63,36 @@ final class Order
         $this->createdAt = $createdAt;
     }
 
-    public function getProducts(): Collection
-    {
-        return $this->products;
-    }
-
-    public function addProduct(Product $product): void
-    {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-        }
-    }
-
-    public function removeProduct(Product $product): void
-    {
-        $this->products->removeElement($product);
-    }
-
     public function getOrderProducts(): Collection
     {
         return $this->orderProducts;
     }
 
-    public function addOrderProduct(OrderProduct $orderProduct): void
+    public function addProductToOrder(Product $product, int $quantity): void
     {
+        $orderProduct = $this->orderProducts->filter(
+            fn(OrderProduct $orderProduct) => $orderProduct->getProduct()->getId() === $product->getId()
+        )->first();
+
         if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
+            $orderProduct = new OrderProduct();
+            $orderProduct->setProduct($product);
             $orderProduct->setOrder($this);
+            $orderProduct->setQuantity($quantity);
+            $this->orderProducts->add($orderProduct);
+        } else {
+            $orderProduct->setQuantity($orderProduct->getQuantity() + $quantity);
         }
     }
 
-    public function removeOrderProduct(OrderProduct $orderProduct): void
+    public function removeProductFromOrder(Product $product): void
     {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            $orderProduct->setOrder(null);
+        $orderProduct = $this->orderProducts->filter(
+            fn(OrderProduct $orderProduct) => $orderProduct->getProduct()->getId() === $product->getId()
+        )->first();
+
+        if ($this->orderProducts->contains($orderProduct)) {
+            $this->orderProducts->removeElement($orderProduct);
         }
     }
 
