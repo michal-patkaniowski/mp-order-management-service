@@ -9,11 +9,11 @@ use ReflectionClass;
 use ReflectionProperty;
 
 /**
- * Summary of MyJsonResponse
+ * Summary of JsonResponseFromObject
  *
  * A custom JsonResponse class that converts objects to associative arrays before encoding them to JSON.
  */
-class MyJsonResponse extends JsonResponse
+class JsonResponseFromObject extends JsonResponse
 {
     public function __construct($objects, int $status = 200, array $headers = [], bool $json = false)
     {

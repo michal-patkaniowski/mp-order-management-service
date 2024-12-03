@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Http\MyJsonResponse;
+use App\Http\JsonResponseFromObject;
 use App\Repository\OrderRepositoryInterface;
 use App\Repository\ProductRepositoryInterface;
 use App\Service\OrderServiceInterface;
@@ -54,10 +54,10 @@ final class OrderController extends AbstractController
             methods: ['GET'],
         )
     ]
-    public function getAllUserOrdersAction(Request $request): MyJsonResponse
+    public function getAllUserOrdersAction(Request $request): JsonResponseFromObject
     {
         $orders = $this->orderRepository->getUserOrders('test-user-id');
-        return new MyJsonResponse($orders);
+        return new JsonResponseFromObject($orders);
     }
 
     #[OA\Get(
@@ -94,12 +94,12 @@ final class OrderController extends AbstractController
             methods: ['GET'],
         )
     ]
-    public function getOrderAction(Request $request, int $orderId): MyJsonResponse
+    public function getOrderAction(Request $request, int $orderId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
         $this->apiDataGuard->ensureOrderAccess($order);
 
-        return new MyJsonResponse($order);
+        return new JsonResponseFromObject($order);
     }
 
     #[OA\Get(
@@ -124,11 +124,11 @@ final class OrderController extends AbstractController
             methods: ['GET'],
         )
     ]
-    public function getActiveUserOrderAction(Request $request): MyJsonResponse
+    public function getActiveUserOrderAction(Request $request): JsonResponseFromObject
     {
         $order = $this->orderService->getActiveUserOrder('test-user-id');
 
-        return new MyJsonResponse($order);
+        return new JsonResponseFromObject($order);
     }
 
     #[OA\Post(
@@ -153,11 +153,11 @@ final class OrderController extends AbstractController
             methods: ['POST'],
         )
     ]
-    public function createNewActiveUserOrderAction(Request $request): MyJsonResponse
+    public function createNewActiveUserOrderAction(Request $request): JsonResponseFromObject
     {
         $newOrder = $this->orderService->createNewUserOrder('test-user-id');
         $this->orderService->setActiveUserOrder('test-user-id', $newOrder);
-        return new MyJsonResponse($newOrder);
+        return new JsonResponseFromObject($newOrder);
     }
 
     #[OA\Post(
@@ -203,7 +203,7 @@ final class OrderController extends AbstractController
             methods: ['POST'],
         )
     ]
-    public function changeOrderStatusAction(Request $request, int $orderId, string $statusAction): MyJsonResponse
+    public function changeOrderStatusAction(Request $request, int $orderId, string $statusAction): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
         $attemptedActionIsCancel = $statusAction === 'cancel';
@@ -212,7 +212,7 @@ final class OrderController extends AbstractController
         $this->apiDataGuard->checkOrderStatus($order, $attemptedActionIsCancel);
 
         $this->orderService->updateOrderStatus($order, $attemptedActionIsCancel);
-        return new MyJsonResponse($order);
+        return new JsonResponseFromObject($order);
     }
 
     #[OA\Post(
@@ -258,7 +258,7 @@ final class OrderController extends AbstractController
             methods: ['POST'],
         )
     ]
-    public function addProductToOrderAction(Request $request, int $orderId, int $productId): MyJsonResponse
+    public function addProductToOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
 
@@ -272,7 +272,7 @@ final class OrderController extends AbstractController
         $order->addProductToOrder($product, 1);
         $this->orderRepository->saveOrder($order);
 
-        return new MyJsonResponse($order);
+        return new JsonResponseFromObject($order);
     }
 
     #[OA\Delete(
@@ -318,7 +318,7 @@ final class OrderController extends AbstractController
             methods: ['DELETE'],
         )
     ]
-    public function removeProductFromOrderAction(Request $request, int $orderId, int $productId): MyJsonResponse
+    public function removeProductFromOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
 
@@ -332,6 +332,6 @@ final class OrderController extends AbstractController
         $order->removeProductFromOrder($product);
 
         $this->orderRepository->saveOrder($order);
-        return new MyJsonResponse($order);
+        return new JsonResponseFromObject($order);
     }
 }
