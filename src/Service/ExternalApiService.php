@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Exception;
+use App\Service\ExternalApiServiceInterface;
 
-class ExternalApiService
+class ExternalApiService implements ExternalApiServiceInterface
 {
     private HttpClientInterface $client;
 
@@ -15,9 +17,13 @@ class ExternalApiService
         $this->client = $client;
     }
 
-    public function fetchProducts(): array
+    public function fetchData($url): array
     {
-        $response = $this->client->request('GET', 'https://fakestoreapi.com/products');
+        $response = $this->client->request('GET', $url);
+        if ($response->getStatusCode() !== 200) {
+            throw new Exception('Failed to fetch data');
+        }
+
         return $response->toArray();
     }
 }

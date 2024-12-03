@@ -5,37 +5,42 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Product;
-use App\Service\ExternalApiService;
+use App\Factory\ProductFactoryInterface;
+use App\Service\ExternalApiServiceInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class ProductRepository implements ProductRepositoryInterface
 {
-    private array $products = [];
-    private ExternalApiService $externalApiService;
-
-    public function __construct(ExternalApiService $externalApiService)
-    {
-        $this->externalApiService = $externalApiService;
-        $this->products = $this->fetchProducts();
+    public function __construct(
+        private ExternalApiServiceInterface $externalApiService,
+        private ParameterBagInterface $params,
+        private ProductFactoryInterface $productFactory
+    ) {
     }
 
+    /**
+     * @return Product[]
+     */
     public function getProducts(): array
     {
-        return $this->products;
+        $url = $this->params->get('FAKESTORE_API_URL') . '/' . $this->params->get('FAKESTORE_API_ENDPOINT_PRODUCTS');
+        $data = $this->externalApiService->fetchData($url);
+        $products = [];
+
+        foreach ($data as $item) {
+            $products[] = $this->productFactory->createFromArray($item);
+        }
+
+        return $products;
     }
 
     public function getProductById(int $id): ?Product
     {
-        return $this->products[$id] ?? null;
-    }
+        $url =
+            $this->params->get('FAKESTORE_API_URL') . '/' .
+            $this->params->get('FAKESTORE_API_ENDPOINT_PRODUCTS') . '/' . $id;
+        $data = $this->externalApiService->fetchData($url);
 
-    private function fetchProducts(): array
-    {
-        $data = $this->externalApiService->fetchProducts();
-        $products = [];
-
-        foreach ($data as $item) {
-        }
-
-        return $products;
+        return $this->productFactory->createFromArray($data);
     }
 }
