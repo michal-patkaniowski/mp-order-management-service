@@ -47,6 +47,8 @@ final class Product
     #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'product')]
     private Collection $orderProducts;
 
+    private bool $available = true;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
@@ -126,5 +128,15 @@ final class Product
     public function getOrderProducts(): Collection
     {
         return $this->orderProducts;
+    }
+
+    public function isAvailable(): bool
+    {
+        return $this->available;
+    }
+
+    public function setAvailable(bool $available): void
+    {
+        $this->available = $available;
     }
 }

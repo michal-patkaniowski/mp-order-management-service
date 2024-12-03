@@ -10,10 +10,10 @@ use InvalidArgumentException;
 
 class OrderService implements OrderServiceInterface
 {
-    private function __construct(private readonly OrderRepositoryInterface $orderRepository)
+    public function __construct(private readonly OrderRepositoryInterface $orderRepository)
     {
     }
-    public function setCurrentUserOrder(string $userId, Order $order): void
+    public function setActiveUserOrder(string $userId, Order $order): void
     {
         if ($order->getUserId() !== $userId) {
             throw new InvalidArgumentException('The order user does not match the provided user id');
@@ -30,13 +30,28 @@ class OrderService implements OrderServiceInterface
         $this->orderRepository->saveOrder($order);
     }
 
-    public function getCurrentUserOrder(string $userId): Order
+    public function getActiveUserOrder(string $userId): ?Order
     {
         $activeOrders = $this->orderRepository->findActiveUserOrders($userId);
         if (count($activeOrders) === 0) {
-            throw new InvalidArgumentException('No active order found for the provided user id');
+            return null;
         }
 
         return $activeOrders[0];
+    }
+
+    public function createNewUserOrder(string $userId): Order
+    {
+        $order = new Order();
+        $order->setUserId($userId);
+        $this->orderRepository->saveOrder($order);
+
+        return $order;
+    }
+
+    public function updateOrderStatus(Order $order, bool $attemptedActionIsCancel): void
+    {
+        $order->setActive(!$attemptedActionIsCancel);
+        $this->orderRepository->saveOrder($order);
     }
 }

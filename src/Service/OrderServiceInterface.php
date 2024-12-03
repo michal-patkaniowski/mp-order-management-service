@@ -8,7 +8,11 @@ use App\Entity\Order;
 
 interface OrderServiceInterface
 {
-    public function setCurrentUserOrder(string $userId, Order $order): void;
+    public function setActiveUserOrder(string $userId, Order $order): void;
 
-    public function getCurrentUserOrder(string $userId): Order;
+    public function getActiveUserOrder(string $userId): ?Order;
+
+    public function createNewUserOrder(string $userId): Order;
+
+    public function updateOrderStatus(Order $order, bool $attemptedActionIsCancel): void;
 }
