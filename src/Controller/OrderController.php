@@ -8,7 +8,7 @@ use App\Http\JsonResponseFromObject;
 use App\Repository\OrderRepositoryInterface;
 use App\Repository\ProductRepositoryInterface;
 use App\Service\OrderServiceInterface;
-use App\Service\ApiDataGuardInterface;
+use App\Utils\ApiDataGuardInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -203,8 +203,11 @@ final class OrderController extends AbstractController
             methods: ['POST'],
         )
     ]
-    public function changeOrderStatusAction(Request $request, int $orderId, string $statusAction): JsonResponseFromObject
-    {
+    public function changeOrderStatusAction(
+        Request $request,
+        int $orderId,
+        string $statusAction
+    ): JsonResponseFromObject {
         $order = $this->orderRepository->getOrderById($orderId);
         $attemptedActionIsCancel = $statusAction === 'cancel';
 

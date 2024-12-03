@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App\Utils;
 
 use App\Entity\Order;
 use App\Entity\OrderProduct;
