@@ -11,8 +11,7 @@ class OrdersControllerTest extends WebTestCase
     public function testCreateOrder()
     {
         $client = static::createClient();
-        $postData = ['product_id' => 1, 'quantity' => 2];
-        $client->request('POST', '/orders', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($postData));
+        $client->request('POST', '/orders');
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to create order');
         $order1 = json_decode($client->getResponse()->getContent(), true);
         return $order1;
