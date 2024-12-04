@@ -12,7 +12,7 @@ class OrdersControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/orders');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to create order');
+        $this->assertResponseIsSuccessful('Failed to create order');
         $order1 = json_decode($client->getResponse()->getContent(), true);
         return $order1;
     }
@@ -24,7 +24,7 @@ class OrdersControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/orders/' . $order1['id']);
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve order by ID');
+        $this->assertResponseIsSuccessful('Failed to retrieve order by ID');
         $order2 = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals($order1, $order2, 'The order retrieved by ID does not match the created order');
         return $order2;
@@ -37,7 +37,7 @@ class OrdersControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/orders/active');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve active order');
+        $this->assertResponseIsSuccessful('Failed to retrieve active order');
         $order3 = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(
             $order2,
@@ -54,7 +54,7 @@ class OrdersControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/orders');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to retrieve all orders');
+        $this->assertResponseIsSuccessful('Failed to retrieve all orders');
         $orders = json_decode($client->getResponse()->getContent(), true);
         $activeOrders = array_filter($orders, fn($order) => $order['active']);
         $order4 = array_values($activeOrders)[0];
@@ -74,14 +74,10 @@ class OrdersControllerTest extends WebTestCase
         $client = static::createClient();
         $newStatus = 'cancel';
         $client->request('PUT', '/orders/' . $newStatus . '/' . $order3['id']);
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to cancel order');
+        $this->assertResponseIsSuccessful('Failed to cancel order');
 
         $client->request('GET', '/orders/' . $order3['id']);
-        $this->assertEquals(
-            200,
-            $client->getResponse()->getStatusCode(),
-            'Failed to retrieve order by ID after status change'
-        );
+        $this->assertResponseIsSuccessful('Failed to retrieve order by ID after status change');
         $updatedOrder = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(false, $updatedOrder['active'], 'Order has not been canceled correctly');
     }
@@ -99,14 +95,10 @@ class OrdersControllerTest extends WebTestCase
 
         $newStatus = 'restore';
         $client->request('PUT', '/orders/' . $newStatus . '/' . $inactiveOrder['id']);
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Failed to restore order');
+        $this->assertResponseIsSuccessful('Failed to restore order');
 
         $client->request('GET', '/orders/' . $inactiveOrder['id']);
-        $this->assertEquals(
-            200,
-            $client->getResponse()->getStatusCode(),
-            'Failed to retrieve order by ID after restoring'
-        );
+        $this->assertResponseIsSuccessful('Failed to retrieve order by ID after restoring');
         $restoredOrder = json_decode($client->getResponse()->getContent(), true);
         $this->assertEquals(true, $restoredOrder['active'], 'Order has not been restored correctly');
     }
