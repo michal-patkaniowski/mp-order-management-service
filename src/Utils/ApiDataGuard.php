@@ -35,9 +35,16 @@ class ApiDataGuard implements ApiDataGuardInterface
         }
     }
 
+    public function ensureOrderExists(?Order $order): void
+    {
+        if ($order === null) {
+            throw new Exception('Order not found', 404);
+        }
+    }
+
     public function ensureOrderAccess(?Order $order, string $userId): void
     {
-        if ($order === null || $order->getUserId() !== $userId) {
+        if ($order->getUserId() !== $userId) {
             throw new Exception('Access forbidden', 403);
         }
     }

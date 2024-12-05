@@ -98,6 +98,7 @@ final class OrderController extends AbstractController
     public function getOrderAction(Request $request, int $orderId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
+        $this->apiDataGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
         $this->apiDataGuard->ensureOrderAccess($order, $userId);
 
@@ -130,6 +131,7 @@ final class OrderController extends AbstractController
     {
         $userId = $this->getUser()->getUserIdentifier();
         $order = $this->orderService->getActiveUserOrder($userId);
+        $this->apiDataGuard->ensureOrderExists($order);
 
         return new JsonResponseFromObject($order);
     }
@@ -214,6 +216,7 @@ final class OrderController extends AbstractController
     ): JsonResponseFromObject {
         $attemptedActionIsCancel = $statusAction === 'cancel';
         $order = $this->orderRepository->getOrderById($orderId);
+        $this->apiDataGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
         $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->checkOrderStatus($order, $attemptedActionIsCancel);
@@ -268,6 +271,7 @@ final class OrderController extends AbstractController
     public function addProductToOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
+        $this->apiDataGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
         $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->ensureOrderIsActive($order);
@@ -328,6 +332,7 @@ final class OrderController extends AbstractController
     public function removeProductFromOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
+        $this->apiDataGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
         $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->ensureOrderIsActive($order);
