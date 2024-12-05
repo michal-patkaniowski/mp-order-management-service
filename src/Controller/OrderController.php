@@ -56,7 +56,8 @@ final class OrderController extends AbstractController
     ]
     public function getAllUserOrdersAction(Request $request): JsonResponseFromObject
     {
-        $orders = $this->orderRepository->getUserOrders('test-user-id');
+        $userId = $this->getUser()->getUserIdentifier();
+        $orders = $this->orderRepository->getUserOrders($userId);
         return new JsonResponseFromObject($orders);
     }
 
@@ -97,7 +98,8 @@ final class OrderController extends AbstractController
     public function getOrderAction(Request $request, int $orderId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-        $this->apiDataGuard->ensureOrderAccess($order);
+        $userId = $this->getUser()->getUserIdentifier();
+        $this->apiDataGuard->ensureOrderAccess($order, $userId);
 
         return new JsonResponseFromObject($order);
     }
@@ -126,7 +128,8 @@ final class OrderController extends AbstractController
     ]
     public function getActiveUserOrderAction(Request $request): JsonResponseFromObject
     {
-        $order = $this->orderService->getActiveUserOrder('test-user-id');
+        $userId = $this->getUser()->getUserIdentifier();
+        $order = $this->orderService->getActiveUserOrder($userId);
 
         return new JsonResponseFromObject($order);
     }
@@ -155,8 +158,9 @@ final class OrderController extends AbstractController
     ]
     public function createNewActiveUserOrderAction(Request $request): JsonResponseFromObject
     {
-        $newOrder = $this->orderService->createNewUserOrder('test-user-id');
-        $this->orderService->setActiveUserOrder('test-user-id', $newOrder);
+        $userId = $this->getUser()->getUserIdentifier();
+        $newOrder = $this->orderService->createNewUserOrder($userId);
+        $this->orderService->setActiveUserOrder($userId, $newOrder);
         return new JsonResponseFromObject($newOrder);
     }
 
@@ -208,10 +212,10 @@ final class OrderController extends AbstractController
         int $orderId,
         string $statusAction
     ): JsonResponseFromObject {
-        $order = $this->orderRepository->getOrderById($orderId);
         $attemptedActionIsCancel = $statusAction === 'cancel';
-
-        $this->apiDataGuard->ensureOrderAccess($order);
+        $order = $this->orderRepository->getOrderById($orderId);
+        $userId = $this->getUser()->getUserIdentifier();
+        $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->checkOrderStatus($order, $attemptedActionIsCancel);
 
         $this->orderService->updateOrderStatus($order, $attemptedActionIsCancel);
@@ -264,8 +268,8 @@ final class OrderController extends AbstractController
     public function addProductToOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-
-        $this->apiDataGuard->ensureOrderAccess($order);
+        $userId = $this->getUser()->getUserIdentifier();
+        $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->ensureOrderIsActive($order);
 
         $product = $this->productRepository->getProductById($productId);
@@ -324,8 +328,8 @@ final class OrderController extends AbstractController
     public function removeProductFromOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-
-        $this->apiDataGuard->ensureOrderAccess($order);
+        $userId = $this->getUser()->getUserIdentifier();
+        $this->apiDataGuard->ensureOrderAccess($order, $userId);
         $this->apiDataGuard->ensureOrderIsActive($order);
 
         $product = $this->productRepository->getProductById($productId);

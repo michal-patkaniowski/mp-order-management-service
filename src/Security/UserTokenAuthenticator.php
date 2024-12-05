@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
-use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 
@@ -18,7 +17,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
  * Authenticates requests using a temporary token.
  * If the request contains a valid token, it is used for authentication.
  * If the request does not contain a valid token, a new token is generated.
- * The token is stored in the request attributes and used to authenticate/identify the user.
+ * The token is stored in the TokenUser object.
  *
  * See also: AddUserTokenToResponseListener
  */
@@ -29,7 +28,7 @@ class UserTokenAuthenticator extends AbstractAuthenticator
         return true;
     }
 
-    public function authenticate(Request $request): Passport
+    public function authenticate(Request $request): SelfValidatingPassport
     {
         $token = $request->headers->get('Authorization');
 
@@ -42,10 +41,8 @@ class UserTokenAuthenticator extends AbstractAuthenticator
             $token = $this->generateToken();
         }
 
-        $request->attributes->set('auth_token', $token);
-
-        return new SelfValidatingPassport(new UserBadge('authenticated', function (): TokenUser {
-            return new TokenUser();
+        return new SelfValidatingPassport(new UserBadge($token, function (string $token): TokenUser {
+            return new TokenUser($token);
         }));
     }
 
@@ -54,7 +51,7 @@ class UserTokenAuthenticator extends AbstractAuthenticator
         return null;
     }
 
-    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?JsonResponse
     {
         return new JsonResponse([
             'error' => 'Authentication Failed',

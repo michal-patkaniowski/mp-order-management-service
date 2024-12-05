@@ -35,9 +35,9 @@ class ApiDataGuard implements ApiDataGuardInterface
         }
     }
 
-    public function ensureOrderAccess(?Order $order): void
+    public function ensureOrderAccess(?Order $order, string $userId): void
     {
-        if ($order === null || $order->getUserId() !== 'test-user-id') {
+        if ($order === null || $order->getUserId() !== $userId) {
             throw new Exception('Access forbidden', 403);
         }
     }
