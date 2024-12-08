@@ -43,3 +43,30 @@ extension=pdo_sqlite
 extension=sqlite3
 sqlite3.extension_dir=ext
 ```
+
+# Setting Up the Project Locally
+
+```bash
+# 1. Clone the Repository
+git clone <repository_url>
+cd <project_folder>
+
+# 2. Install Dependencies
+composer install
+
+# 3. Set Up the Database
+# Install SQLite if not already installed
+php bin/console doctrine:migrations:migrate
+
+# 4. Run Tests
+php bin/phpunit
+
+# 5. Start the Server
+symfony server:start
+```
+
+# Making API Requests
+
+- Use Postman or any other API client to interact with the API.
+- Refer to the API documentation located at `public/openapi.json`.
+
