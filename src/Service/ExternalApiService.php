@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Exception;
 use App\Service\ExternalApiServiceInterface;
+use Exception;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ExternalApiService implements ExternalApiServiceInterface
 {
@@ -17,7 +17,7 @@ class ExternalApiService implements ExternalApiServiceInterface
         $this->client = $client;
     }
 
-    public function fetchData($url): array
+    public function fetchData(string $url): array
     {
         $response = $this->client->request('GET', $url);
         if ($response->getStatusCode() !== 200) {

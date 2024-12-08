@@ -7,13 +7,11 @@ namespace App\Repository;
 use App\Entity\Product;
 use App\Factory\ProductFactoryInterface;
 use App\Service\ExternalApiServiceInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class ProductRepository implements ProductRepositoryInterface
 {
     public function __construct(
         private ExternalApiServiceInterface $externalApiService,
-        private ParameterBagInterface $params,
         private ProductFactoryInterface $productFactory
     ) {
     }
@@ -23,7 +21,7 @@ class ProductRepository implements ProductRepositoryInterface
      */
     public function getProducts(): array
     {
-        $url = $this->params->get('FAKESTORE_API_URL') . '/' . $this->params->get('FAKESTORE_API_ENDPOINT_PRODUCTS');
+        $url = getenv('FAKESTORE_API_URL') . '/' . getenv('FAKESTORE_API_ENDPOINT_PRODUCTS');
         $data = $this->externalApiService->fetchData($url);
         $products = [];
 
@@ -37,8 +35,8 @@ class ProductRepository implements ProductRepositoryInterface
     public function getProductById(int $id): ?Product
     {
         $url =
-            $this->params->get('FAKESTORE_API_URL') . '/' .
-            $this->params->get('FAKESTORE_API_ENDPOINT_PRODUCTS') . '/' . $id;
+            getenv('FAKESTORE_API_URL') . '/' .
+            getenv('FAKESTORE_API_ENDPOINT_PRODUCTS') . '/' . $id;
         $data = $this->externalApiService->fetchData($url);
 
         return $this->productFactory->createFromArray($data);

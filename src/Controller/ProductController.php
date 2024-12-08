@@ -7,7 +7,6 @@ namespace App\Controller;
 use App\Http\JsonResponseFromObject;
 use App\Repository\ProductRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use OpenApi\Attributes as OA;
 
@@ -22,7 +21,7 @@ use OpenApi\Attributes as OA;
 final class ProductController extends AbstractController
 {
     public function __construct(
-        private ProductRepositoryInterface $productRepository
+        private ProductRepositoryInterface $productRepository,
     ) {
     }
 
@@ -48,7 +47,7 @@ final class ProductController extends AbstractController
             methods: ['GET'],
         )
     ]
-    public function getProducts(Request $request): JsonResponseFromObject
+    public function getAllProductsAction(): JsonResponseFromObject
     {
         $products = $this->productRepository->getProducts();
         return new JsonResponseFromObject($products);
@@ -88,7 +87,7 @@ final class ProductController extends AbstractController
             methods: ['GET'],
         )
     ]
-    public function getProduct(Request $request, int $productId): JsonResponseFromObject
+    public function getProductAction(int $productId): JsonResponseFromObject
     {
         $product = $this->productRepository->getProductById($productId);
         return new JsonResponseFromObject($product);

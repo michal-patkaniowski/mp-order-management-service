@@ -6,5 +6,5 @@ namespace App\Service;
 
 interface ExternalApiServiceInterface
 {
-    public function fetchData($url): array;
+    public function fetchData(string $url): array;
 }

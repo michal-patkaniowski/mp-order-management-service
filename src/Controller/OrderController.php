@@ -8,7 +8,8 @@ use App\Http\JsonResponseFromObject;
 use App\Repository\OrderRepositoryInterface;
 use App\Repository\ProductRepositoryInterface;
 use App\Service\OrderServiceInterface;
-use App\Utils\ApiDataGuardInterface;
+use App\Utils\ApiOrderGuardInterface;
+use App\Utils\ApiProductGuardInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,7 +29,8 @@ final class OrderController extends AbstractController
         private OrderRepositoryInterface $orderRepository,
         private ProductRepositoryInterface $productRepository,
         private OrderServiceInterface $orderService,
-        private ApiDataGuardInterface $apiDataGuard
+        private ApiOrderGuardInterface $apiOrderGuard,
+        private ApiProductGuardInterface $apiProductGuard
     ) {
     }
 
@@ -98,9 +100,9 @@ final class OrderController extends AbstractController
     public function getOrderAction(Request $request, int $orderId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-        $this->apiDataGuard->ensureOrderExists($order);
+        $this->apiOrderGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
-        $this->apiDataGuard->ensureOrderAccess($order, $userId);
+        $this->apiOrderGuard->ensureOrderAccess($order, $userId);
 
         return new JsonResponseFromObject($order);
     }
@@ -131,7 +133,7 @@ final class OrderController extends AbstractController
     {
         $userId = $this->getUser()->getUserIdentifier();
         $order = $this->orderService->getActiveUserOrder($userId);
-        $this->apiDataGuard->ensureOrderExists($order);
+        $this->apiOrderGuard->ensureOrderExists($order);
 
         return new JsonResponseFromObject($order);
     }
@@ -216,10 +218,10 @@ final class OrderController extends AbstractController
     ): JsonResponseFromObject {
         $attemptedActionIsCancel = $statusAction === 'cancel';
         $order = $this->orderRepository->getOrderById($orderId);
-        $this->apiDataGuard->ensureOrderExists($order);
+        $this->apiOrderGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
-        $this->apiDataGuard->ensureOrderAccess($order, $userId);
-        $this->apiDataGuard->checkOrderStatus($order, $attemptedActionIsCancel);
+        $this->apiOrderGuard->ensureOrderAccess($order, $userId);
+        $this->apiOrderGuard->checkOrderStatus($order, $attemptedActionIsCancel);
 
         $this->orderService->updateOrderStatus($order, $attemptedActionIsCancel);
         return new JsonResponseFromObject($order);
@@ -271,14 +273,14 @@ final class OrderController extends AbstractController
     public function addProductToOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-        $this->apiDataGuard->ensureOrderExists($order);
+        $this->apiOrderGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
-        $this->apiDataGuard->ensureOrderAccess($order, $userId);
-        $this->apiDataGuard->ensureOrderIsActive($order);
+        $this->apiOrderGuard->ensureOrderAccess($order, $userId);
+        $this->apiOrderGuard->ensureOrderIsActive($order);
 
         $product = $this->productRepository->getProductById($productId);
-        $this->apiDataGuard->ensureProductExists($product);
-        $this->apiDataGuard->ensureProductIsAvailable($product);
+        $this->apiProductGuard->ensureProductExists($product);
+        $this->apiProductGuard->ensureProductIsAvailable($product);
 
         $order->addProductToOrder($product, 1);
         $this->orderRepository->saveOrder($order);
@@ -332,14 +334,14 @@ final class OrderController extends AbstractController
     public function removeProductFromOrderAction(Request $request, int $orderId, int $productId): JsonResponseFromObject
     {
         $order = $this->orderRepository->getOrderById($orderId);
-        $this->apiDataGuard->ensureOrderExists($order);
+        $this->apiOrderGuard->ensureOrderExists($order);
         $userId = $this->getUser()->getUserIdentifier();
-        $this->apiDataGuard->ensureOrderAccess($order, $userId);
-        $this->apiDataGuard->ensureOrderIsActive($order);
+        $this->apiOrderGuard->ensureOrderAccess($order, $userId);
+        $this->apiOrderGuard->ensureOrderIsActive($order);
 
         $product = $this->productRepository->getProductById($productId);
 
-        $this->apiDataGuard->ensureProductInOrder($order, $product);
+        $this->apiProductGuard->ensureProductInOrder($order, $product);
 
         $order->removeProductFromOrder($product);
 
