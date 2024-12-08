@@ -10,138 +10,142 @@ class OrdersControllerTest extends WebTestCase
 {
     private $client;
 
-    private const REFERENCE_ORDER = [
-        'id' => 86,
-        'userId' => '30b3c1b6cb426932fd5ff00345880aef',
-        'active' => true,
-        'orderProducts' => [],
-    ];
-
     protected function setUp(): void
     {
         $this->client = static::createClient();
     }
 
-    public function testGetOrderById(): void
+    public function testCreateOrder(): array
+    {
+        $this->client->request('POST', '/orders');
+        $this->assertResponseIsSuccessful('Failed to create order');
+        $order = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(true, $order['active'], 'The new order is not active');
+
+        print_r('Order created: ');
+        print_r($order);
+
+        return $order;
+    }
+
+    /**
+     * @depends testCreateOrder
+     */
+    public function testGetOrderById(array $order): void
     {
         $this->client->request(
             'GET',
-            '/orders/' . self::REFERENCE_ORDER['id'],
+            '/orders/' . $order['id'],
             [],
             [],
-            ['HTTP_Authorization' => 'Bearer ' . self::REFERENCE_ORDER['userId']]
+            ['HTTP_Authorization' => 'Bearer ' . $order['userId']]
         );
         $this->assertResponseIsSuccessful('Failed to retrieve order by ID');
-        $order = json_decode($this->client->getResponse()->getContent(), true);
+        $retrievedOrder = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals(
-            self::REFERENCE_ORDER['id'],
             $order['id'],
+            $retrievedOrder['id'],
             'The order retrieved by ID does not match the created order'
         );
         $this->assertEquals(
-            self::REFERENCE_ORDER['active'],
-            $order['active'],
+            true,
+            $retrievedOrder['active'],
             'The order retrieved by ID is not active'
         );
         $this->assertEquals(
-            self::REFERENCE_ORDER['userId'],
             $order['userId'],
+            $retrievedOrder['userId'],
             'The order retrieved by ID does not belong to the user'
         );
     }
 
-    public function testGetActiveOrder(): void
+    /**
+     * @depends testCreateOrder
+     */
+    public function testGetActiveOrder(array $order): void
     {
         $this->client->request(
             'GET',
             '/orders/active',
             [],
             [],
-            ['HTTP_Authorization' => 'Bearer ' . self::REFERENCE_ORDER['userId']]
+            ['HTTP_Authorization' => 'Bearer ' . $order['userId']]
         );
         $this->assertResponseIsSuccessful('Failed to retrieve active order');
-        $order = json_decode($this->client->getResponse()->getContent(), true);
+        $retrievedOrder = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertOrderEquals(
-            self::REFERENCE_ORDER,
             $order,
+            $retrievedOrder,
             'The retrieved user\'s active order does not match the order retrieved by ID'
         );
     }
 
-    public function testGetAllOrders(): void
+    /**
+     * @depends testCreateOrder
+     */
+    public function testGetAllOrders(array $order): void
     {
         $this->client->request(
             'GET',
             '/orders',
             [],
             [],
-            ['HTTP_Authorization' => 'Bearer ' . self::REFERENCE_ORDER['userId']]
+            ['HTTP_Authorization' => 'Bearer ' . $order['userId']]
         );
         $this->assertResponseIsSuccessful('Failed to retrieve all orders');
         $orders = json_decode($this->client->getResponse()->getContent(), true);
-        $activeOrders = array_filter($orders, fn($order) => $order['active']);
-        $order = array_values($activeOrders)[0];
+        $activeOrders = array_filter($orders, fn($o) => $o['active']);
+        $retrievedOrder = array_values($activeOrders)[0];
         $this->assertOrderEquals(
-            self::REFERENCE_ORDER,
             $order,
+            $retrievedOrder,
             'The first active order from the orders list does not match the retrieved user\'s active order'
         );
     }
 
-    public function testCancelOrder(): void
+    /**
+     * @depends testCreateOrder
+     */
+    public function testCancelOrder(array $order): void
     {
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], true);
+        $this->assertOrderStatus($order['id'], true, $order['userId']);
 
-        $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'cancel');
+        $this->changeOrderStatus($order['id'], 'cancel', $order['userId']);
 
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], false);
+        $this->assertOrderStatus($order['id'], false, $order['userId']);
 
-        $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'restore'); // cleanup
+        $this->changeOrderStatus($order['id'], 'restore', $order['userId']); // cleanup
 
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], true);  // cleanup
+        $this->assertOrderStatus($order['id'], true, $order['userId']);  // cleanup
     }
 
-    public function testRestoreOrder(): void
+    /**
+     * @depends testCreateOrder
+     */
+    public function testRestoreOrder(array $order): void
     {
         //if the order is already active, cancel it first
-        if (self::REFERENCE_ORDER['active']) {
-            $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'cancel');
-        }
+        $this->changeOrderStatus($order['id'], 'cancel', $order['userId']);
 
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], false);
+        $this->assertOrderStatus($order['id'], false, $order['userId']);
 
-        $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'restore');
+        $this->changeOrderStatus($order['id'], 'restore', $order['userId']);
 
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], true);
+        $this->assertOrderStatus($order['id'], true, $order['userId']);
 
-        $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'cancel'); // cleanup
+        $this->changeOrderStatus($order['id'], 'cancel', $order['userId']); // cleanup
 
-        $this->assertOrderStatus(self::REFERENCE_ORDER['id'], false);  // cleanup
+        $this->assertOrderStatus($order['id'], false, $order['userId']);  // cleanup
     }
 
-    public function testCreateOrder(): void
-    {
-        $this->client->request('POST', '/orders');
-        $this->assertResponseIsSuccessful('Failed to create order');
-        $order = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertNotEquals(
-            self::REFERENCE_ORDER['id'],
-            $order['id'],
-            'The new order id matches the reference order id'
-        );
-        $this->assertEquals(true, $order['active'], 'The new order is not active');
-
-        $this->changeOrderStatus(self::REFERENCE_ORDER['id'], 'restore'); // cleanup
-    }
-
-    private function assertOrderStatus(int $orderId, bool $expectedStatus): void
+    private function assertOrderStatus(int $orderId, bool $expectedStatus, string $userId): void
     {
         $this->client->request(
             'GET',
             '/orders/' . $orderId,
             [],
             [],
-            ['HTTP_Authorization' => 'Bearer ' . self::REFERENCE_ORDER['userId']]
+            ['HTTP_Authorization' => 'Bearer ' . $userId]
         );
         $this->assertResponseIsSuccessful('Failed to retrieve order');
         $order = json_decode($this->client->getResponse()->getContent(), true);
@@ -153,14 +157,14 @@ class OrdersControllerTest extends WebTestCase
         );
     }
 
-    private function changeOrderStatus(int $orderId, string $newStatus): void
+    private function changeOrderStatus(int $orderId, string $newStatus, string $userId): void
     {
         $this->client->request(
             'PUT',
             '/orders/' . $newStatus . '/' . $orderId,
             [],
             [],
-            ['HTTP_Authorization' => 'Bearer ' . self::REFERENCE_ORDER['userId']]
+            ['HTTP_Authorization' => 'Bearer ' . $userId]
         );
         $this->assertResponseIsSuccessful('Failed to change order status to ' . $newStatus);
     }
