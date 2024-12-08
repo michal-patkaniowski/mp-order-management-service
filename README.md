@@ -46,22 +46,31 @@ sqlite3.extension_dir=ext
 
 # Setting Up the Project Locally
 
-```bash
 # 1. Clone the Repository
+```bash
 git clone <repository_url>
 cd <project_folder>
+```
 
 # 2. Install Dependencies
+```bash
 composer install
+```
 
 # 3. Set Up the Database
 # Install SQLite if not already installed
+```bash
 php bin/console doctrine:migrations:migrate
+```
 
 # 4. Run Tests
+```bash
 php bin/phpunit
+```
 
 # 5. Start the Server
+
+```bash
 symfony server:start
 ```
 
