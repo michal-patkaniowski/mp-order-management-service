@@ -1,6 +1,4 @@
-# mp-order-management-service
-
-# Order Management Service
+# MP Order Management Service
 
 ## Overview
 This service enables users to manage orders by integrating with an external product system (FakeStoreAPI).
@@ -36,7 +34,9 @@ This service enables users to manage orders by integrating with an external prod
 
 ---
 
-## Prerequisites
+
+## Setting Up the Project Locally
+### Prerequisites
 Ensure the following extensions are enabled in your `php.ini` configuration file:
 ```ini
 extension=pdo_sqlite
@@ -44,35 +44,37 @@ extension=sqlite3
 sqlite3.extension_dir=ext
 ```
 
-# Setting Up the Project Locally
-
-## 1. Clone the Repository
+### 1. Clone the Repository
 ```bash
-git clone <repository_url>
+git clone https://github.com/michal-patkaniowski/mp-order-management-service.git
 cd <project_folder>
 ```
 
-## 2. Install Dependencies
+### 2. Install Dependencies
+Run in the project folder:
 ```bash
 composer install
 ```
 
-## 3. Run Migrations
+### 3. Run Migrations
+Run in the project folder:
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
 
-## 4. Run Tests
+### 4. Run Tests
+Run in the project folder:
 ```bash
-php bin/phpunit
+vendor/bin/phpunit
 ```
 
-## 5. Start the Server
+### 5. Start the Server
+Run in the project folder:
 ```bash
 symfony server:start
 ```
 
-# Making API Requests
+## Making API Requests
 
 - Use Postman or any other API client to interact with the API.
 - Refer to the API documentation located at `public/openapi.json`.
