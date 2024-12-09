@@ -47,7 +47,7 @@ sqlite3.extension_dir=ext
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/michal-patkaniowski/mp-order-management-service.git
-cd <project_folder>
+cd mp-order-management-service
 ```
 
 ### 2. Install Dependencies
